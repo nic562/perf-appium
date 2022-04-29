@@ -1,0 +1,2 @@
+Appium-Python-Client~=2.2.0
+AndroidPerf @ git+https://github.com/nic562/AndroidPerf#egg=AndroidPerf
