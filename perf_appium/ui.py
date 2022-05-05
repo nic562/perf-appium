@@ -1,10 +1,9 @@
 import time
+import abc
 
 from appium import webdriver
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webelement import WebElement
-
-from android_perf.base_adb import AdbProxy
 
 
 class ElementNotFound(Exception):
@@ -15,32 +14,20 @@ class ElementNotFound(Exception):
         return self.value
 
 
-class UI(object):
+class BaseUI(metaclass=abc.ABCMeta):
 
     @staticmethod
-    def open_remote_android_driver(adb: AdbProxy, appium_server_url: str = None, **cfg):
+    def open_remote_driver(appium_server_url: str = None, **cfg):
         """
         启动 Appium 客户端
-        :param adb:
         :param appium_server_url: Appium服务端地址
-        :param cfg: 键值对配置项，参数健值请参考appium客户端配置，如：
-            appPackage: 需启动的 app 包名
-            appActivity: app 启动的主 Activity
-            noReset: bool，是否保留 session 信息，默认 True 可以避免重新登录
-        :return:
+        :param cfg: 键值对配置项，参数健值请参考appium客户端配置，
+        :return: webdriver.Remote
         """
-        config = {
-            "platformName": "Android",  # 操作系统
-            "deviceName": adb.get_device_serial(),  # 设备 ID
-            "platformVersion": adb.get_device_info().os_version,  # 设备版本号
-            'noReset': True
-        }
-        config.update(cfg)
-        return webdriver.Remote(appium_server_url or 'http://localhost:4723/wd/hub', config)
+        return webdriver.Remote(appium_server_url or 'http://localhost:4723/wd/hub', cfg)
 
-    def __init__(self, dev: webdriver.Remote, adb: AdbProxy):
+    def __init__(self, dev: webdriver.Remote):
         self.dev = dev
-        self.adb = adb
 
     def find_element(self, value: str, by: str = None) -> WebElement:
         if value in self.dev.page_source:
@@ -69,9 +56,9 @@ class UI(object):
         if not on_exists:
             raise ElementNotFound(resource)
 
+    @abc.abstractmethod
     def input(self, value: str):
-        # 向界面元素对象输入文本，前提是必须先对对象执行click事件
-        self.adb.input(value)
+        raise NotImplementedError
 
     def match_content(self, resource: str, txt_re, by: str = None, on_exists=False, timeout: int = None) -> bool:
         v = self.exist(resource=resource, by=by, timeout=timeout)
@@ -80,6 +67,16 @@ class UI(object):
         if not on_exists:
             raise ElementNotFound(resource)
         return False
+
+    def swipe(self, x0: int, y0: int, x1: int, y1: int, duration: int = 300):
+        self.dev.swipe(x0, y0, x1, y1, duration=duration)
+
+    @abc.abstractmethod
+    def get_device_resolution(self) -> (int, int):
+        raise NotImplementedError
+
+    def ui_quit(self):
+        self.dev.quit()
 
     @staticmethod
     def sleep(seconds: int):
