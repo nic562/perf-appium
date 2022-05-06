@@ -1,9 +1,12 @@
 import time
 import abc
+from typing import Union, List
 
 from appium import webdriver
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webelement import WebElement
+from selenium.common.exceptions import WebDriverException
+from .log import default as logging
 
 
 class ElementNotFound(Exception):
@@ -29,9 +32,22 @@ class BaseUI(metaclass=abc.ABCMeta):
     def __init__(self, dev: webdriver.Remote):
         self.dev = dev
 
+    def _exists(self, value: str) -> bool:
+        try:
+            rs = self.dev.page_source
+            return value in rs
+        except WebDriverException:
+            logging.warning('get pate source failed! Trying again...')
+            self.sleep(1)
+            return self._exists(value)
+
     def find_element(self, value: str, by: str = None) -> WebElement:
-        if value in self.dev.page_source:
+        if self._exists(value):
             return self.dev.find_element(by=by or AppiumBy.ID, value=value)
+
+    def find_elements(self, value: str, by: str = None) -> Union[List[WebElement], List]:
+        if self._exists(value):
+            return self.dev.find_elements(by=by or AppiumBy.ID, value=value)
 
     def exist(self, resource: str, by: str = None, timeout: int = None):
         """是否存在某元素
@@ -60,16 +76,18 @@ class BaseUI(metaclass=abc.ABCMeta):
     def input(self, value: str):
         raise NotImplementedError
 
-    def match_content(self, resource: str, txt_re, by: str = None, on_exists=False, timeout: int = None) -> bool:
+    def match_content(self, resource: str, txt_or_re, by: str = None, on_exists=False, timeout: int = None) -> bool:
         v = self.exist(resource=resource, by=by, timeout=timeout)
         if v:
-            return txt_re.match(v.text)
+            if hasattr(txt_or_re, 'match'):
+                return txt_or_re.match(v.text)
+            return txt_or_re == v.text
         if not on_exists:
             raise ElementNotFound(resource)
         return False
 
     def swipe(self, x0: int, y0: int, x1: int, y1: int, duration: int = 300):
-        self.dev.swipe(x0, y0, x1, y1, duration=duration)
+        return self.dev.swipe(x0, y0, x1, y1, duration=duration)
 
     @abc.abstractmethod
     def get_device_resolution(self) -> (int, int):
