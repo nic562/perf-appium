@@ -36,8 +36,8 @@ class BaseUI(metaclass=abc.ABCMeta):
         try:
             rs = self.dev.page_source
             return value in rs
-        except WebDriverException:
-            logging.warning('get pate source failed! Trying again...')
+        except WebDriverException as e:
+            logging.warning(f'{e}\n!!!Get page source failed! Trying again...')
             self.sleep(1)
             return self._exists(value)
 

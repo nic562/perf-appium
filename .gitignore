@@ -8,3 +8,6 @@ tmp/
 build/
 
 *.egg-info/
+
+*.apk
+*.log

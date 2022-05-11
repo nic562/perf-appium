@@ -49,7 +49,7 @@ class DeviceOsOperation(metaclass=abc.ABCMeta):
 class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
 
     @staticmethod
-    def open_android_driver(adb: AdbProxy, appium_server_url: str = None, **cfg):
+    def open_android_driver_by_adb(adb: AdbProxy, appium_server_url: str = None, **cfg):
         """
         启动 Appium 客户端
         :param adb:
@@ -64,14 +64,26 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
             "platformName": "Android",  # 操作系统
             "deviceName": adb.get_device_serial(),  # 设备 ID
             "platformVersion": adb.get_device_info().os_version,  # 设备版本号
-            'noReset': True
+            # "newCommandTimeout": 60000,
+            # 'noReset': True
+        }
+        config.update(cfg)
+        return BaseUI.open_remote_driver(appium_server_url, **config)
+
+    @staticmethod
+    def open_android_driver(serial: str, appium_server_url: str = None, **cfg):
+        config = {
+            "platformName": "Android",  # 操作系统
+            "deviceName": serial,  # 设备 ID
+            # "newCommandTimeout": 60000,
+            # 'noReset': True
         }
         config.update(cfg)
         return BaseUI.open_remote_driver(appium_server_url, **config)
 
     def __init__(self, adb: AdbProxy, dev: driver.Remote = None):
         if dev is None:
-            dev = self.open_android_driver(adb)
+            dev = self.open_android_driver_by_adb(adb)
         super().__init__(dev)
         self.adb = adb
         self.device_info = self.adb.get_device_info()
