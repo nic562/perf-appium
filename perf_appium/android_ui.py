@@ -3,8 +3,8 @@ import abc
 from android_perf.base_adb import AdbProxy
 
 from .ui import BaseUI
-from .ui import webdriver as driver
 from .log import default as log
+from .appium_device import AppiumDevice
 
 
 class DeviceOsOperation(metaclass=abc.ABCMeta):
@@ -49,7 +49,7 @@ class DeviceOsOperation(metaclass=abc.ABCMeta):
 class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
 
     @staticmethod
-    def open_android_driver_by_adb(adb: AdbProxy, appium_server_url: str = None, **cfg):
+    def open_android_driver_by_adb(adb: AdbProxy, appium_server_url: str = None, **cfg) -> AppiumDevice:
         """
         启动 Appium 客户端
         :param adb:
@@ -64,24 +64,21 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
             "platformName": "Android",  # 操作系统
             "deviceName": adb.get_device_serial(),  # 设备 ID
             "platformVersion": adb.get_device_info().os_version,  # 设备版本号
-            # "newCommandTimeout": 60000,
             # 'noReset': True
         }
         config.update(cfg)
-        return BaseUI.open_remote_driver(appium_server_url, **config)
+        return AppiumDevice.open_remote_driver(appium_server_url, **config)
 
     @staticmethod
-    def open_android_driver(serial: str, appium_server_url: str = None, **cfg):
+    def open_android_driver(serial: str = None, appium_server_url: str = None, **cfg) -> AppiumDevice:
         config = {
             "platformName": "Android",  # 操作系统
             "deviceName": serial,  # 设备 ID
-            # "newCommandTimeout": 60000,
-            # 'noReset': True
         }
         config.update(cfg)
-        return BaseUI.open_remote_driver(appium_server_url, **config)
+        return AppiumDevice.open_remote_driver(appium_server_url, **config)
 
-    def __init__(self, adb: AdbProxy, dev: driver.Remote = None):
+    def __init__(self, adb: AdbProxy, dev: AppiumDevice = None):
         if dev is None:
             dev = self.open_android_driver_by_adb(adb)
         super().__init__(dev)
@@ -92,7 +89,7 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
         self.screen_height = res[1]
 
     def close(self):
-        self.ui_quit()
+        self.quit()
         self.adb.close()
 
     def home(self):
