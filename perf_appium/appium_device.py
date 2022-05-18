@@ -126,11 +126,11 @@ class AppiumDevice:
 
     def reconnect(self):
         self.quit()
-        log.warning(f'!!!Appium reconnect device...')
+        log.warning(f'!!! Appium reconnect device...')
         self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
 
     def quit(self):
-        log.warning('!!!Appium device quit !!!')
+        log.warning('!!! Appium device quit !!!')
         try:
             self.dev.quit()
         except:

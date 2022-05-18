@@ -21,6 +21,7 @@ class AndroidPerfBaseHelper(_AndroidPerfBaseHelper, metaclass=abc.ABCMeta):
         self.ui.close_all_app()
 
     def apply_screen_record_permission(self) -> bool:
+        logging.info('请求录屏授权...')
         return self.ui.permission_screen_record()
 
 
