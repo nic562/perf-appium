@@ -70,7 +70,7 @@ class AppiumDevice:
             rs = self.dev.page_source
             return value in rs
         except WebDriverException as e:
-            log.warning(f'{e}\n\n!!!Get page source failed! Trying again...')
+            log.warning(f'!!! Appium get page source failed!\n===========\n{e}\n============\nTrying again...')
             self.reconnect()
             return self.check_exists(value)
 
@@ -127,7 +127,11 @@ class AppiumDevice:
     def reconnect(self):
         self.quit()
         log.warning(f'!!! Appium reconnect device...')
-        self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
+        try:
+            self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
+        except WebDriverException as e:
+            log.error(f'!!! Appium reconnect failed!\n{e}')
+            raise Exception(f'Appium reconnect error: {e}')
 
     def quit(self):
         log.warning('!!! Appium device quit !!!')
