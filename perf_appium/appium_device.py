@@ -9,12 +9,16 @@ from selenium.common.exceptions import WebDriverException
 from .log import default as log
 
 
-class ElementNotFound(Exception):
+class ElementNotFoundError(Exception):
     def __init__(self, resource: str):
         self.value = f'Element undefined: {resource}'
 
     def __str__(self):
         return self.value
+
+
+class AppiumReconnectError(Exception):
+    pass
 
 
 class AppiumDevice:
@@ -43,7 +47,7 @@ class AppiumDevice:
         self.dev = dev
         self.config = self.dev.capabilities['desired']
         self.appium_server_url = self.dev.command_executor._url
-        log.info(
+        log.debug(
             f'{type(self)} bind Appium device session [{dev.session_id}] '
             f'on server [{self.appium_server_url}] with config: {self.config}')
 
@@ -109,7 +113,7 @@ class AppiumDevice:
                 self.reconnect()
             return v
         if not on_exists:
-            raise ElementNotFound(resource)
+            raise ElementNotFoundError(resource)
 
     def match_content(self, resource: str, txt_or_re, by: str = None, on_exists=False, timeout: int = None) -> bool:
         v = self.exist(resource=resource, by=by, timeout=timeout)
@@ -118,7 +122,7 @@ class AppiumDevice:
                 return txt_or_re.match(v.text)
             return txt_or_re == v.text
         if not on_exists:
-            raise ElementNotFound(resource)
+            raise ElementNotFoundError(resource)
         return False
 
     def swipe(self, x0: int, y0: int, x1: int, y1: int, duration: int = 300):
@@ -131,7 +135,14 @@ class AppiumDevice:
             self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
         except WebDriverException as e:
             log.error(f'!!! Appium reconnect failed!\n{e}')
-            raise Exception(f'Appium reconnect error: {e}')
+            try:
+                log.warning(f'!!! Appium try to uninstall uiautomator2!')
+                self.remove_app('io.appium.uiautomator2.server.test')
+                self.remove_app('io.appium.uiautomator2.server')
+            except WebDriverException as ee:
+                log.error(f'!!! Appium uninstall uiautomator2 error:\n{ee}')
+                raise AppiumReconnectError
+            self.reconnect()
 
     def quit(self):
         log.warning('!!! Appium device quit !!!')
