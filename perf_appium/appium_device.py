@@ -135,14 +135,7 @@ class AppiumDevice:
             self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
         except WebDriverException as e:
             log.error(f'!!! Appium reconnect failed!\n{e}')
-            try:
-                log.warning(f'!!! Appium try to uninstall uiautomator2!')
-                self.remove_app('io.appium.uiautomator2.server.test')
-                self.remove_app('io.appium.uiautomator2.server')
-            except WebDriverException as ee:
-                log.error(f'!!! Appium uninstall uiautomator2 error:\n{ee}')
-                raise AppiumReconnectError
-            self.reconnect()
+            raise AppiumReconnectError
 
     def quit(self):
         log.warning('!!! Appium device quit !!!')
