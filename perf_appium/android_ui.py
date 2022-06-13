@@ -62,7 +62,7 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
         """
         config = {
             "platformName": "Android",  # 操作系统
-            "deviceName": adb.get_device_serial(),  # 设备 ID
+            "udid": adb.get_device_serial(),  # 设备 ID
             "platformVersion": adb.get_device_info().os_version,  # 设备版本号
             # 'noReset': True
         }
@@ -73,7 +73,7 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
     def open_android_driver(serial: str = None, appium_server_url: str = None, **cfg) -> AppiumDevice:
         config = {
             "platformName": "Android",  # 操作系统
-            "deviceName": serial,  # 设备 ID
+            "udid": serial,  # 设备 ID
         }
         config.update(cfg)
         return AppiumDevice.open_remote_driver(appium_server_url, **config)
