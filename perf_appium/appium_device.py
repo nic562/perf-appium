@@ -4,7 +4,7 @@ from typing import Union, List, Any, Optional
 from appium import webdriver
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.webelement import WebElement
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException
 
 from .log import default as log
 
@@ -77,6 +77,34 @@ class AppiumDevice:
             log.warning(f'!!! Appium get page source failed!\n===========\n{e}\n============\nTrying again...')
             self.reconnect()
             return self.check_exists(value)
+
+    @staticmethod
+    def mk_xpath(value: str, view_tag='*', key=None) -> str:
+        """
+        构建xpath
+        :param value: 值
+        :param view_tag: 标签，默认*
+        :param key: text, content-desc, class. 默认：content-desc
+        :return:
+        """
+        view_tag = view_tag or '*'
+        key = key or "content-desc"
+        return f'//{view_tag}[@{key}="{value}"]'
+
+    def find_element_by_xpath(self, value: str, view_tag=None, key=None):
+        if self.check_exists(value):
+            # 关键字存在，但不一定代表指定的ui元素存在
+            try:
+                return self.dev.find_element(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key))
+            except NoSuchElementException:
+                pass
+
+    def find_elements_by_xpath(self, value: str, view_tag=None, key=None):
+        if self.check_exists(value):
+            try:
+                return self.dev.find_elements(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key))
+            except NoSuchElementException:
+                pass
 
     def find_element(self, value: str, by: str = None) -> WebElement:
         if self.check_exists(value):
