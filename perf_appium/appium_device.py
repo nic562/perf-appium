@@ -108,11 +108,17 @@ class AppiumDevice:
 
     def find_element(self, value: str, by: str = None) -> WebElement:
         if self.check_exists(value):
-            return self.dev.find_element(by=by or AppiumBy.ID, value=value)
+            try:
+                return self.dev.find_element(by=by or AppiumBy.ID, value=value)
+            except NoSuchElementException:
+                pass
 
     def find_elements(self, value: str, by: str = None) -> Union[List[WebElement], List]:
         if self.check_exists(value):
-            return self.dev.find_elements(by=by or AppiumBy.ID, value=value)
+            try:
+                return self.dev.find_elements(by=by or AppiumBy.ID, value=value)
+            except NoSuchElementException:
+                pass
 
     def exist(self, resource: str, by: str = None, timeout: int = None):
         """是否存在某元素，存在则返回对应元素
