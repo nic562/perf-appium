@@ -98,6 +98,9 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
     def go_back(self):
         self.adb.go_back()
 
+    def task_manager(self):
+        self.adb.task_manager()
+
     def input(self, value: str):
         # 向界面元素对象输入文本，前提是必须先对对象执行click事件
         return self.adb.input(value)

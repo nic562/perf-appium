@@ -167,6 +167,9 @@ class AppiumDevice:
         log.warning(f'!!! Appium reconnect device...')
         try:
             self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
+            if self.dev is None:
+                log.warning('!!! Appium device reconnect failed! Try again...')
+                self.reconnect()
         except WebDriverException as e:
             log.error(f'!!! Appium reconnect failed!\n{e}')
             raise AppiumReconnectError
