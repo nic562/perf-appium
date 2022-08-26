@@ -1,5 +1,6 @@
 import time
 from typing import Union, List, Any, Optional
+import threading
 
 from appium import webdriver
 from appium.webdriver.common.appiumby import AppiumBy
@@ -44,12 +45,28 @@ class AppiumDevice:
         return webdriver.Remote(appium_server_url or 'http://localhost:4723/wd/hub', cfg)
 
     def __init__(self, dev: webdriver.Remote):
-        self.dev = dev
-        self.config = self.dev.capabilities['desired']
-        self.appium_server_url = self.dev.command_executor._url
+        self._dev = dev
+        self._dev_lock = threading.Lock()
+        self.config = dev.capabilities['desired']
+        self.appium_server_url = dev.command_executor._url
         log.debug(
             f'{type(self)} bind Appium device session [{dev.session_id}] '
             f'on server [{self.appium_server_url}] with config: {self.config}')
+
+    def _set_device(self, dev):
+        with self._dev_lock:
+            self._dev = dev
+
+    @property
+    def dev(self):
+        with self._dev_lock:
+            if self._dev:
+                return self._dev
+            raise RuntimeError('设备对象丢失，请重试！')
+
+    def _reconnect_device(self):
+        with self._dev_lock:
+            self._dev = self._open_remote_driver(self.appium_server_url, **self.config)
 
     def execute_script(self, script, *args):
         return self.dev.execute_script(script, *args)
@@ -166,7 +183,7 @@ class AppiumDevice:
         self.quit()
         log.warning(f'!!! Appium reconnect device...')
         try:
-            self.dev = self._open_remote_driver(self.appium_server_url, **self.config)
+            self._reconnect_device()
             if self.dev is None:
                 log.warning('!!! Appium device reconnect failed! Try again...')
                 self.reconnect()
@@ -181,4 +198,4 @@ class AppiumDevice:
         except:
             pass
         finally:
-            self.dev = None
+            self._set_device(None)
