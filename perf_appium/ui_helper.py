@@ -10,10 +10,11 @@ def call_device_ui(func):
     def wrapper(ui, *args):
         assert isinstance(ui, AndroidUI)
         dev = ui.get_device_ui()
-        fn = getattr(dev, func.__name__)
+        n = func.__name__
+        fn = getattr(dev, n) if hasattr(dev, n) else None
         if fn:
             return fn(*args)
-        return func(*args)
+        return func(ui, *args)
 
     return wrapper
 
@@ -57,10 +58,14 @@ class AndroidUI(AndroidBaseUI, metaclass=abc.ABCMeta):
         return False
 
     @call_device_ui
-    def upgrade_apps(self) -> bool:
+    def upgrade_app(self, pkg: str) -> bool:
         return False
 
     @call_device_ui
     def get_main_container(self):
         return None
+
+    @call_device_ui
+    def open_app_market(self, pkg: str):
+        return super().open_app_market(pkg)
 

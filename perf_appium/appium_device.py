@@ -96,30 +96,33 @@ class AppiumDevice:
             return self.check_exists(value)
 
     @staticmethod
-    def mk_xpath(value: str, view_tag='*', key=None) -> str:
+    def mk_xpath(value: str, view_tag=None, key=None, is_contains=False) -> str:
         """
         构建xpath
         :param value: 值
         :param view_tag: 标签，默认*
         :param key: text, content-desc, class. 默认：content-desc
+        :param is_contains: 是否模糊匹配，默认否
         :return:
         """
         view_tag = view_tag or '*'
         key = key or "content-desc"
+        if is_contains:
+            return f'//{view_tag}[contains(@{key},"{value}")]'
         return f'//{view_tag}[@{key}="{value}"]'
 
-    def find_element_by_xpath(self, value: str, view_tag=None, key=None):
+    def find_element_by_xpath(self, value: str, view_tag=None, key=None, is_contains=False):
         if self.check_exists(value):
             # 关键字存在，但不一定代表指定的ui元素存在
             try:
-                return self.dev.find_element(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key))
+                return self.dev.find_element(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key, is_contains))
             except NoSuchElementException:
                 pass
 
-    def find_elements_by_xpath(self, value: str, view_tag=None, key=None):
+    def find_elements_by_xpath(self, value: str, view_tag=None, key=None, is_contains=False):
         if self.check_exists(value):
             try:
-                return self.dev.find_elements(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key))
+                return self.dev.find_elements(by=AppiumBy.XPATH, value=self.mk_xpath(value, view_tag, key, is_contains))
             except NoSuchElementException:
                 pass
 

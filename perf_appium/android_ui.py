@@ -38,7 +38,8 @@ class DeviceOsOperation(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def upgrade_apps(self) -> bool:
+    def upgrade_app(self, pkg: str) -> bool:
+        # 升级指定应用
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -79,6 +80,7 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
         return AppiumDevice.open_remote_driver(appium_server_url, **config)
 
     def __init__(self, adb: AdbProxy, dev: AppiumDevice = None):
+        assert adb
         if dev is None:
             dev = self.open_android_driver_by_adb(adb)
         super().__init__(dev)
@@ -107,6 +109,9 @@ class AndroidBaseUI(BaseUI, DeviceOsOperation, metaclass=abc.ABCMeta):
 
     def get_device_resolution(self) -> (int, int):
         return self.adb.get_device_resolution()
+
+    def open_app_market(self, pkg: str):
+        return self.adb.run_shell(f'am start -d market://details?id={pkg}')
 
     @property
     def device_brand(self):

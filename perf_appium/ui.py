@@ -18,11 +18,11 @@ class BaseUI(metaclass=abc.ABCMeta):
     def find_elements(self, value: str, by: str = None) -> Union[List[WebElement], List]:
         return self.dev.find_elements(value, by)
 
-    def find_element_by_xpath(self, value: str, view_tag=None, key=None):
-        return self.dev.find_element_by_xpath(value, view_tag, key)
+    def find_element_by_xpath(self, value: str, view_tag=None, key=None, is_contains=False):
+        return self.dev.find_element_by_xpath(value, view_tag, key, is_contains)
 
-    def find_elements_by_xpath(self, value: str, view_tag=None, key=None):
-        return self.dev.find_elements_by_xpath(value, view_tag, key)
+    def find_elements_by_xpath(self, value: str, view_tag=None, key=None, is_contains=False):
+        return self.dev.find_elements_by_xpath(value, view_tag, key, is_contains)
 
     def exist(self, resource: str, by: str = None, timeout: int = None):
         return self.dev.exist(resource, by, timeout)
