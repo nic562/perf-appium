@@ -1,6 +1,4 @@
-from setuptools import setup
-
-from perf_appium import __version__
+from setuptools import setup, find_packages
 
 
 def parse_requirements(filename):
@@ -11,8 +9,8 @@ def parse_requirements(filename):
 
 setup(
     name='perf-appium',
-    packages=['perf_appium'],
-    version=__version__,
+    packages=find_packages(),
+    version='0.3',
     author='Nicholas Chen',
     author_email='nic562@gmail.com',
     license='Apache License 2.0',

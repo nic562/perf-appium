@@ -1,7 +1,7 @@
-Appium-Python-Client~=2.2.0
+Appium-Python-Client>=2.2.0
 selenium~=4.1.3
 setuptools
 
 # AndroidPerf @ git+https://github.com/nic562/AndroidPerf#egg=AndroidPerf
-AndroidPerf[pure-adb]~=0.2
+AndroidPerf[pure-adb]>=0.3
 # You can see: https://github.com/nic562/AndroidPerf

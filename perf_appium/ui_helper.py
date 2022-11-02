@@ -1,14 +1,14 @@
 import abc
 from functools import wraps
 
-from .android_ui import AndroidBaseUI, DeviceOsOperation
+from .android_ui import AndroidBaseUI as _AndroidBaseUI, DeviceOsOperation
 
 
 def call_device_ui(func):
     # 适配不同设备的情况
     @wraps(func)
     def wrapper(ui, *args):
-        assert isinstance(ui, AndroidUI)
+        assert isinstance(ui, AndroidBaseUI)
         dev = ui.get_device_ui()
         n = func.__name__
         fn = getattr(dev, n) if hasattr(dev, n) else None
@@ -19,7 +19,7 @@ def call_device_ui(func):
     return wrapper
 
 
-class AndroidUI(AndroidBaseUI, metaclass=abc.ABCMeta):
+class AndroidBaseUI(_AndroidBaseUI, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_device_ui(self) -> DeviceOsOperation:

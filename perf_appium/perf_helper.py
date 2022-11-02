@@ -3,7 +3,7 @@ import abc
 from android_perf.perf_helper import AndroidPerfBaseHelper as _AndroidPerfBaseHelper
 from android_perf.perf_helper import AndroidPerfBaseHelperWithWhistle as _AndroidPerfBaseHelperWithWhistle
 
-from .ui_helper import AndroidUI
+from .ui_helper import AndroidBaseUI
 from .log import default as logging
 
 
@@ -11,7 +11,7 @@ class AndroidPerfBaseHelper(_AndroidPerfBaseHelper, metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def ui(self) -> AndroidUI:
+    def ui(self) -> AndroidBaseUI:
         raise NotImplementedError
 
     def close_all_app(self):
